@@ -17,6 +17,14 @@ public with sharing class AQE_CPQQuoteAdapter implements AQE_IQuoteAdapter {
     private static final String OBJ_QUOTE      = 'SBQQ__Quote__c';
     private static final String OBJ_QUOTE_LINE = 'SBQQ__QuoteLine__c';
 
+    // Guard: SBQQ__Opportunity__c exists in some CPQ versions but not all.
+    // Check once at class-load time so we never throw "Invalid field" at runtime.
+    private static final Boolean HAS_OPP_FIELD = (
+        Schema.getGlobalDescribe().get(OBJ_QUOTE) != null &&
+        Schema.getGlobalDescribe().get(OBJ_QUOTE).getDescribe().fields.getMap()
+              .containsKey('sbqq__opportunity__c')
+    );
+
     // ─── Quote Header ─────────────────────────────────────────────────────────
 
     public Id createQuote(AQE_QuoteDTO dto) {
@@ -25,7 +33,9 @@ public with sharing class AQE_CPQQuoteAdapter implements AQE_IQuoteAdapter {
         try {
             SObject q = Schema.getGlobalDescribe().get(OBJ_QUOTE).newSObject();
             q.put('SBQQ__Account__c',     dto.accountId);
-            q.put('SBQQ__Opportunity__c', dto.opportunityId);
+            if (HAS_OPP_FIELD && dto.opportunityId != null) {
+                q.put('SBQQ__Opportunity__c', dto.opportunityId);
+            }
             q.put('SBQQ__PriceBook__c',   dto.pricebookId);
             q.put('SBQQ__ExpirationDate__c', dto.expirationDate);
             q.put('SBQQ__Status__c',      dto.status != null ? dto.status : 'Draft');
@@ -43,7 +53,8 @@ public with sharing class AQE_CPQQuoteAdapter implements AQE_IQuoteAdapter {
 
     public AQE_QuoteDTO getQuote(Id quoteId) {
         AQE_SecurityUtil.checkObjectAccess(OBJ_QUOTE, AQE_SecurityUtil.DML_READ);
-        String soql = 'SELECT Id, Name, SBQQ__Account__c, SBQQ__Opportunity__c, '
+        String soql = 'SELECT Id, Name, SBQQ__Account__c, '
+            + (HAS_OPP_FIELD ? 'SBQQ__Opportunity__c, ' : '')
             + 'SBQQ__PriceBook__c, SBQQ__ExpirationDate__c, SBQQ__Status__c '
             + 'FROM SBQQ__Quote__c WHERE Id = \'' + String.escapeSingleQuotes(quoteId) + '\' LIMIT 1';
         List<SObject> results = Database.query(soql);
@@ -55,7 +66,9 @@ public with sharing class AQE_CPQQuoteAdapter implements AQE_IQuoteAdapter {
         dto.id              = (Id)   q.get('Id');
         dto.name            = (String) q.get('Name');
         dto.accountId       = (Id)   q.get('SBQQ__Account__c');
-        dto.opportunityId   = (Id)   q.get('SBQQ__Opportunity__c');
+        if (HAS_OPP_FIELD) {
+            dto.opportunityId = (Id) q.get('SBQQ__Opportunity__c');
+        }
         dto.pricebookId     = (Id)   q.get('SBQQ__PriceBook__c');
         dto.expirationDate  = (Date) q.get('SBQQ__ExpirationDate__c');
         dto.status          = (String) q.get('SBQQ__Status__c');
