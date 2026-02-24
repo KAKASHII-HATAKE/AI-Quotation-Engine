@@ -1,0 +1,15 @@
+{
+  "orgName": "AQE Test Org",
+  "edition": "Developer",
+  "features": [
+    "EnableSetPasswordInApi"
+  ],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
+    },
+    "quoteSettings": {
+      "enableQuote": true
+    }
+  }
+}

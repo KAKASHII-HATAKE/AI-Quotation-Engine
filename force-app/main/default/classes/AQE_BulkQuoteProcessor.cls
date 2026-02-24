@@ -64,9 +64,9 @@ public with sharing class AQE_BulkQuoteProcessor implements Queueable {
     public void execute(QueueableContext context) {
         AQE_IQuoteAdapter adapter = AQE_AdapterFactory.getAdapter();
 
-        Integer end = Math.min(chunkStart + CHUNK_SIZE, lines.size());
+        Integer chunkEnd = Math.min(chunkStart + CHUNK_SIZE, lines.size());
         List<AQE_QuoteLineDTO> chunk = new List<AQE_QuoteLineDTO>();
-        for (Integer i = chunkStart; i < end; i++) {
+        for (Integer i = chunkStart; i < chunkEnd; i++) {
             chunk.add(lines[i]);
         }
 
@@ -74,12 +74,12 @@ public with sharing class AQE_BulkQuoteProcessor implements Queueable {
             List<Id> createdIds = adapter.createQuoteLines(quoteId, chunk);
 
             // Update progress in transaction log
-            updateLogProgress(transactionLogId, end, lines.size(), batchTransactionId);
+            updateLogProgress(transactionLogId, chunkEnd, lines.size(), batchTransactionId);
 
             // Chain next chunk if more lines remain
-            if (end < lines.size()) {
+            if (chunkEnd < lines.size()) {
                 System.enqueueJob(new AQE_BulkQuoteProcessor(
-                    quoteId, lines, batchTransactionId, transactionLogId, end
+                    quoteId, lines, batchTransactionId, transactionLogId, chunkEnd
                 ));
             } else {
                 // All chunks processed — mark complete

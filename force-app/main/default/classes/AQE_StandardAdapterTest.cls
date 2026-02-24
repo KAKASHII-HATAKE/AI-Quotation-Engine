@@ -16,10 +16,12 @@ private class AQE_StandardAdapterTest {
     @IsTest
     static void testCreateAndGetQuote() {
         Account acc = [SELECT Id FROM Account LIMIT 1];
+        Opportunity opp = AQE_TestDataFactory.createOpportunity(acc.Id);
         AQE_StandardQuoteAdapter adapter = new AQE_StandardQuoteAdapter();
 
         AQE_QuoteDTO dto = new AQE_QuoteDTO(acc.Id, Test.getStandardPricebookId());
         dto.name           = 'Test Quote';
+        dto.opportunityId  = opp.Id;
         dto.expirationDate = Date.today().addDays(30);
 
         Test.startTest();
@@ -36,11 +38,13 @@ private class AQE_StandardAdapterTest {
     @IsTest
     static void testCreateAndGetQuoteLines() {
         Account acc = [SELECT Id FROM Account LIMIT 1];
+        Opportunity opp = AQE_TestDataFactory.createOpportunity(acc.Id);
         Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'LAPTOP-PRO-15' LIMIT 1];
         PricebookEntry pbe = [SELECT Id FROM PricebookEntry WHERE Product2Id = :prod.Id LIMIT 1];
 
         AQE_StandardQuoteAdapter adapter = new AQE_StandardQuoteAdapter();
         AQE_QuoteDTO dto = new AQE_QuoteDTO(acc.Id, Test.getStandardPricebookId());
+        dto.opportunityId = opp.Id;
         Id quoteId = adapter.createQuote(dto);
 
         AQE_QuoteLineDTO lineDTO = new AQE_QuoteLineDTO('LAPTOP-PRO-15', 5, 1200.00);
@@ -61,11 +65,14 @@ private class AQE_StandardAdapterTest {
     @IsTest
     static void testCalculateTotals() {
         Account acc = [SELECT Id FROM Account LIMIT 1];
+        Opportunity opp = AQE_TestDataFactory.createOpportunity(acc.Id);
         Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'LAPTOP-PRO-15' LIMIT 1];
         PricebookEntry pbe = [SELECT Id FROM PricebookEntry WHERE Product2Id = :prod.Id LIMIT 1];
 
         AQE_StandardQuoteAdapter adapter = new AQE_StandardQuoteAdapter();
-        Id quoteId = adapter.createQuote(new AQE_QuoteDTO(acc.Id, Test.getStandardPricebookId()));
+        AQE_QuoteDTO dto = new AQE_QuoteDTO(acc.Id, Test.getStandardPricebookId());
+        dto.opportunityId = opp.Id;
+        Id quoteId = adapter.createQuote(dto);
 
         AQE_QuoteLineDTO line = new AQE_QuoteLineDTO('LAPTOP-PRO-15', 10, 1200.00);
         line.product2Id = prod.Id;

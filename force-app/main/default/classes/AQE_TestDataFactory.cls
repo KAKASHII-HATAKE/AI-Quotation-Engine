@@ -102,13 +102,26 @@ public class AQE_TestDataFactory {
         return dto;
     }
 
-    /** Creates a test Quote for the given account in the standard pricebook */
+    /** Creates and inserts a test Opportunity for the given account */
+    public static Opportunity createOpportunity(Id accountId) {
+        Opportunity opp = new Opportunity(
+            Name      = 'Test Opportunity',
+            AccountId = accountId,
+            StageName = 'Prospecting',
+            CloseDate = Date.today().addDays(30)
+        );
+        insert opp;
+        return opp;
+    }
+
+    /** Creates a test Quote for the given account via an Opportunity (AccountId is derived from Opportunity) */
     public static Quote createQuote(Id accountId) {
+        Opportunity opp = createOpportunity(accountId);
         Quote q = new Quote(
-            Name         = 'Test Quote',
-            AccountId    = accountId,
-            Pricebook2Id = Test.getStandardPricebookId(),
-            Status       = 'Draft',
+            Name          = 'Test Quote',
+            OpportunityId = opp.Id,
+            Pricebook2Id  = Test.getStandardPricebookId(),
+            Status        = 'Draft',
             ExpirationDate = Date.today().addDays(30)
         );
         insert q;

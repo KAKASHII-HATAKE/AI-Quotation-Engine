@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
     <customSettingsType>Hierarchy</customSettingsType>
-    <deploymentStatus>Deployed</deploymentStatus>
-    <description>Hierarchy Custom Setting storing AI engine configuration including LLM endpoint, cloud environment type, feature flags, and operational parameters. All admin-configurable, zero hard-coded values.</description>
+<description>Hierarchy Custom Setting storing AI engine configuration including LLM endpoint, cloud environment type, feature flags, and operational parameters. All admin-configurable, zero hard-coded values.</description>
     <enableFeeds>false</enableFeeds>
     <label>AI Engine Config</label>
     <visibility>Public</visibility>

@@ -39,7 +39,7 @@ public with sharing class AQE_RevenueCloudAdapter implements AQE_IQuoteAdapter {
     public AQE_QuoteDTO getQuote(Id quoteId) {
         AQE_SecurityUtil.checkObjectAccess('Order', AQE_SecurityUtil.DML_READ);
         Order o = [
-            SELECT Id, Name, AccountId, Pricebook2Id, Status, CurrencyIsoCode
+            SELECT Id, Name, AccountId, Pricebook2Id, Status
             FROM   Order
             WHERE  Id = :quoteId
             WITH   SECURITY_ENFORCED
@@ -51,7 +51,6 @@ public with sharing class AQE_RevenueCloudAdapter implements AQE_IQuoteAdapter {
         dto.accountId       = o.AccountId;
         dto.pricebookId     = o.Pricebook2Id;
         dto.status          = o.Status;
-        dto.currencyIsoCode = o.CurrencyIsoCode;
         dto.cloudEnvironment = ENV;
         return dto;
     }

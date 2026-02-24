@@ -47,6 +47,9 @@ export default class AqeQuoteGeneratorMain extends LightningElement {
     get engineStatusClass() {
         return this.engineActive ? 'engine-badge engine-active' : 'engine-badge engine-disabled';
     }
+    get engineIconName() {
+        return this.engineActive ? 'utility:check' : 'utility:warning';
+    }
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
     connectedCallback() {

@@ -14,7 +14,6 @@ public with sharing class AQE_StandardQuoteAdapter implements AQE_IQuoteAdapter 
         AQE_SecurityUtil.checkObjectAccess('Quote', AQE_SecurityUtil.DML_CREATE);
         Quote q = new Quote(
             Name            = dto.name != null ? dto.name : 'AQE Quote - ' + System.now().format(),
-            AccountId       = dto.accountId,
             OpportunityId   = dto.opportunityId,
             Pricebook2Id    = dto.pricebookId,
             ExpirationDate  = dto.expirationDate,
@@ -31,7 +30,7 @@ public with sharing class AQE_StandardQuoteAdapter implements AQE_IQuoteAdapter 
         AQE_SecurityUtil.checkObjectAccess('Quote', AQE_SecurityUtil.DML_READ);
         Quote q = [
             SELECT Id, Name, AccountId, OpportunityId, Pricebook2Id,
-                   ExpirationDate, Status, Description, CurrencyIsoCode
+                   ExpirationDate, Status, Description
             FROM   Quote
             WHERE  Id = :quoteId
             WITH   SECURITY_ENFORCED
@@ -46,7 +45,6 @@ public with sharing class AQE_StandardQuoteAdapter implements AQE_IQuoteAdapter 
         dto.expirationDate  = q.ExpirationDate;
         dto.status          = q.Status;
         dto.description     = q.Description;
-        dto.currencyIsoCode = q.CurrencyIsoCode;
         dto.cloudEnvironment = ENV;
         return dto;
     }

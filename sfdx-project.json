@@ -6,12 +6,15 @@
       "package": "AI-Quotation-Engine",
       "versionName": "Version 1.0",
       "versionNumber": "1.0.0.NEXT",
-      "versionDescription": "AI-Native Quotation Engine for Salesforce CPQ & Revenue Cloud"
+      "versionDescription": "AI-Native Quotation Engine for Salesforce CPQ and Revenue Cloud"
     }
   ],
   "name": "AI-Quotation-Engine",
-  "namespace": "aqe",
+  "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "65.0",
-  "packageAliases": {}
+  "packageAliases": {
+    "AI-Quotation-Engine": "0Hog50000000VAHCA2",
+    "AI-Quotation-Engine@1.0.0-1": "04tg50000003jobAAA"
+  }
 }

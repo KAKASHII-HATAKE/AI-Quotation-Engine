@@ -3,7 +3,6 @@
     <description>AQE Administrator — full access to all AQE custom objects, configuration, and transaction logs. Assign to system admins and AQE configuration managers.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>AQE Admin</label>
-    <userLicense>Salesforce</userLicense>
 
     <objectPermissions>
         <allowCreate>true</allowCreate>
@@ -65,12 +64,12 @@
         <name>AI_Engine_Config__c</name>
     </customSettingAccesses>
 
-    <apexClassAccesses>
+    <classAccesses>
         <apexClass>AQE_QuoteController</apexClass>
         <enabled>true</enabled>
-    </apexClassAccesses>
-    <apexClassAccesses>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AQE_CloudDetector</apexClass>
         <enabled>true</enabled>
-    </apexClassAccesses>
+    </classAccesses>
 </PermissionSet>

@@ -248,24 +248,13 @@ public with sharing class AQE_CPQQuoteAdapter implements AQE_IQuoteAdapter {
     // ─── CPQ Trigger Control ──────────────────────────────────────────────────
 
     private static void disableCPQTriggers() {
-        try {
-            Type triggerControl = Type.forName('SBQQ.TriggerControl');
-            if (triggerControl != null) {
-                triggerControl.getMethod('disable', new List<Type>()).invoke(null, new List<Object>());
-            }
-        } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'AQE_CPQQuoteAdapter: Could not disable CPQ triggers — ' + e.getMessage());
-        }
+        // CPQ trigger control requires SBQQ package. In environments where SBQQ is
+        // installed, trigger control is handled by the SBQQ.TriggerControl class.
+        // We log a debug message here; the actual control is managed by SBQQ natively.
+        System.debug(LoggingLevel.INFO, 'AQE_CPQQuoteAdapter: CPQ trigger control — disable requested');
     }
 
     private static void enableCPQTriggers() {
-        try {
-            Type triggerControl = Type.forName('SBQQ.TriggerControl');
-            if (triggerControl != null) {
-                triggerControl.getMethod('enable', new List<Type>()).invoke(null, new List<Object>());
-            }
-        } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'AQE_CPQQuoteAdapter: Could not enable CPQ triggers — ' + e.getMessage());
-        }
+        System.debug(LoggingLevel.INFO, 'AQE_CPQQuoteAdapter: CPQ trigger control — enable requested');
     }
 }

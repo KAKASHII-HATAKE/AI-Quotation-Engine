@@ -3,7 +3,6 @@
     <description>AQE Sales User — read-only access to rules, ability to generate quotes using the AI Quote Generator. Cannot modify rules or configuration. Assign to all sales users who will use quote generation.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>AQE User</label>
-    <userLicense>Salesforce</userLicense>
 
     <objectPermissions>
         <allowCreate>false</allowCreate>
@@ -56,8 +55,8 @@
         <name>AI_Engine_Config__c</name>
     </customSettingAccesses>
 
-    <apexClassAccesses>
+    <classAccesses>
         <apexClass>AQE_QuoteController</apexClass>
         <enabled>true</enabled>
-    </apexClassAccesses>
+    </classAccesses>
 </PermissionSet>

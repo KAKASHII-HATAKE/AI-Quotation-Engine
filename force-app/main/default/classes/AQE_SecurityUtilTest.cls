@@ -33,11 +33,11 @@ private class AQE_SecurityUtilTest {
     @IsTest
     static void testSanitiseForSoql_escapesQuotes() {
         Test.startTest();
-        String input  = "O'Brien";
+        String input  = 'O\'Brien';
         String output = AQE_SecurityUtil.sanitiseForSoql(input);
         Test.stopTest();
 
-        System.assertEquals("O\\'Brien", output, 'Single quotes should be escaped');
+        System.assertEquals('O\\\'Brien', output, 'Single quotes should be escaped');
     }
 
     @IsTest
