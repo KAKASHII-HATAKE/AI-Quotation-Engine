@@ -137,6 +137,7 @@ public with sharing class AQE_QuoteController {
             result.quoteTotals  = llmResp.quoteSummary;
             result.warnings     = validation.warnings;
             result.warnings.addAll(llmResp.warnings != null ? llmResp.warnings : new List<String>());
+            result.warnings.addAll(approvalDecision.warnings);
 
             updateTransactionLog(txnLog, 'Success', quoteId, new List<String>(), startTime);
 
@@ -231,25 +232,21 @@ public with sharing class AQE_QuoteController {
         return [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1].Id;
     }
 
+    // Build the log object only — no DML here so callouts are not blocked.
+    // The actual insert happens in updateTransactionLog after the callout.
     private static AI_Transaction_Log__c createTransactionLog(String prompt, Id accountId) {
-        AI_Transaction_Log__c log = new AI_Transaction_Log__c(
+        return new AI_Transaction_Log__c(
             User_Prompt__c          = prompt.left(32768),
             Processing_Status__c    = 'Pending',
             Cloud_Environment__c    = AQE_CloudDetector.getCurrent()
         );
-        try {
-            insert log;
-        } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'Could not create transaction log: ' + e.getMessage());
-        }
-        return log;
     }
 
+    // Insert on first call (log.Id == null), update on subsequent calls.
     private static void updateTransactionLog(
         AI_Transaction_Log__c log, String status, Id quoteId,
         List<String> errors, Long startTime
     ) {
-        if (log.Id == null) return;
         try {
             log.Processing_Status__c  = status;
             log.Quote_Id__c           = quoteId;
@@ -257,9 +254,13 @@ public with sharing class AQE_QuoteController {
             if (!errors.isEmpty()) {
                 log.Validation_Errors__c = JSON.serialize(errors);
             }
-            update log;
+            if (log.Id == null) {
+                insert log;
+            } else {
+                update log;
+            }
         } catch (Exception e) {
-            System.debug(LoggingLevel.WARN, 'Could not update transaction log: ' + e.getMessage());
+            System.debug(LoggingLevel.WARN, 'Could not save transaction log: ' + e.getMessage());
         }
     }
 }

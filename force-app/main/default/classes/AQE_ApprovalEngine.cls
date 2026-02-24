@@ -92,7 +92,25 @@ public with sharing class AQE_ApprovalEngine {
             : 'AQE automated approval submission. Policy: ' + decision.policyName
               + '. Reason: ' + decision.reason;
 
-        return adapter.submitForApproval(quoteId, submitComment);
+        try {
+            return adapter.submitForApproval(quoteId, submitComment);
+        } catch (DmlException e) {
+            // NO_APPLICABLE_PROCESS means no native Approval Process is configured in
+            // this org for the quote object. The quote has already been created — log
+            // a warning and return null rather than failing the whole operation.
+            if (e.getMessage().contains('NO_APPLICABLE_PROCESS')) {
+                System.debug(LoggingLevel.WARN,
+                    'AQE_ApprovalEngine: no Salesforce Approval Process found for quote '
+                    + quoteId + '. Quote created but not submitted for approval. '
+                    + 'Configure an Approval Process in Setup to enable this feature.');
+                decision.warnings.add(
+                    'Approval required by policy but no Approval Process is configured '
+                    + 'in Setup. Quote was saved — ask your admin to set up an Approval Process.'
+                );
+                return null;
+            }
+            throw e; // re-throw anything else
+        }
     }
 
     /**
