@@ -87,9 +87,21 @@ public with sharing class AQE_BulkQuoteProcessor implements Queueable {
             }
 
         } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR, 'AQE_BulkQuoteProcessor: Chunk failed at ' + chunkStart + ' — ' + e.getMessage());
-            finaliseLog(transactionLogId, 'Rollback');
-            rollbackCreatedLines(quoteId, batchTransactionId, adapter);
+            String errMsg = 'Bulk line creation failed at chunk ' + chunkStart + ': ' + e.getMessage();
+            System.debug(LoggingLevel.ERROR, 'AQE_BulkQuoteProcessor: ' + errMsg);
+            // Persist error in transaction log so it is visible in the audit log UI
+            if (transactionLogId != null) {
+                try {
+                    update new AI_Transaction_Log__c(
+                        Id = transactionLogId,
+                        Processing_Status__c = 'LLM Error',
+                        Validation_Errors__c = JSON.serialize(new List<String>{ errMsg })
+                    );
+                } catch (Exception logEx) {
+                    System.debug(LoggingLevel.WARN, 'Could not update log with error: ' + logEx.getMessage());
+                }
+            }
+            rollbackCreatedLines(quoteId, adapter);
         }
     }
 
@@ -127,20 +139,18 @@ public with sharing class AQE_BulkQuoteProcessor implements Queueable {
         }
     }
 
-    private static void rollbackCreatedLines(Id quoteId, String batchId, AQE_IQuoteAdapter adapter) {
-        // Find any lines already created in this batch and delete them
-        // (Standard Salesforce only — CPQ/Revenue Cloud adapters use their own rollback)
+    private static void rollbackCreatedLines(Id quoteId, AQE_IQuoteAdapter adapter) {
+        // Delete all lines on the quote using the adapter — works for Standard, CPQ, and Revenue Cloud.
         try {
-            List<QuoteLineItem> toDelete = [
-                SELECT Id FROM QuoteLineItem
-                WHERE QuoteId = :quoteId
-                AND Description LIKE :(batchId + '%')
-                WITH SECURITY_ENFORCED
-            ];
-            if (!toDelete.isEmpty()) {
+            List<AQE_QuoteLineDTO> existing = adapter.getQuoteLines(quoteId);
+            if (!existing.isEmpty()) {
                 List<Id> ids = new List<Id>();
-                for (QuoteLineItem qli : toDelete) { ids.add(qli.Id); }
-                adapter.deleteQuoteLines(ids);
+                for (AQE_QuoteLineDTO line : existing) {
+                    if (line.id != null) { ids.add(line.id); }
+                }
+                if (!ids.isEmpty()) {
+                    adapter.deleteQuoteLines(ids);
+                }
             }
         } catch (Exception e) {
             System.debug(LoggingLevel.ERROR, 'Rollback failed: ' + e.getMessage());

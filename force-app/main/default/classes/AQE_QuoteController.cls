@@ -54,12 +54,17 @@ public with sharing class AQE_QuoteController {
             List<AI_Approval_Policy__c> approvalPolicies = AQE_RuleEngine.getAllApprovalPolicies();
             List<AI_Discount_Rule__c> discountRules = AQE_RuleEngine.getApplicableDiscountRules(Date.today());
 
-            // 4. Build LLM request — pass discount rules as context so the LLM honours
-            //    them when generating prices. Product-specific rules are loaded after the
-            //    LLM responds (product codes are not yet known at this point).
+            // 4. Pre-load full product catalogue so the LLM knows every available product.
+            //    Essential for "all active products" requests and gives live LLM full context.
+            //    Also avoids a second SOQL query after the callout.
+            AQE_IQuoteAdapter adapter = AQE_AdapterFactory.getAdapter();
+            Map<String, AQE_ProductDTO> allProductMap = loadAllActiveProducts();
+
+            // 5. Build LLM request — include full product catalogue + discount rules as context.
             AQE_LLMService.LLMRequest llmReq = new AQE_LLMService.LLMRequest();
             llmReq.userPrompt  = String.escapeSingleQuotes(userPrompt.trim());
             llmReq.sessionId   = txnLog.Id;
+            llmReq.products    = buildProductCatalogue(allProductMap);
             llmReq.ruleContext = AQE_RuleEngine.buildRuleContext(
                 new List<AI_Pricing_Rule__c>(),
                 new List<AI_Product_Rule__c>(),
@@ -72,19 +77,30 @@ public with sharing class AQE_QuoteController {
                 'quote_date'        => String.valueOf(Date.today())
             });
 
-            // 5. Call LLM service
+            // 6. Call LLM service
             AQE_LLMService.LLMResponse llmResp = AQE_LLMService.generateQuote(llmReq);
 
             if (!llmResp.success) {
                 throw new AQE_Exception('LLM processing failed: ' + llmResp.errorMessage);
             }
 
-            // 6. Load products + product-specific rules (product codes now known)
+            // 7. Build product map from the pre-loaded catalogue — no extra SOQL needed.
+            //    Fall back to a targeted query only for codes not in the standard pricebook.
             List<String> productCodes = extractProductCodes(llmResp.quoteLines);
-            AQE_IQuoteAdapter adapter = AQE_AdapterFactory.getAdapter();
-            List<AQE_ProductDTO> products = adapter.getProducts(productCodes);
             Map<String, AQE_ProductDTO> productMap = new Map<String, AQE_ProductDTO>();
-            for (AQE_ProductDTO p : products) { productMap.put(p.productCode, p); }
+            List<String> missingCodes = new List<String>();
+            for (String code : productCodes) {
+                if (allProductMap.containsKey(code)) {
+                    productMap.put(code, allProductMap.get(code));
+                } else {
+                    missingCodes.add(code);
+                }
+            }
+            if (!missingCodes.isEmpty()) {
+                for (AQE_ProductDTO p : adapter.getProducts(missingCodes)) {
+                    productMap.put(p.productCode, p);
+                }
+            }
 
             List<AI_Pricing_Rule__c> pricingRules = AQE_RuleEngine.getApplicablePricingRules(productCodes, Date.today());
             List<AI_Product_Rule__c> productRules  = AQE_RuleEngine.getApplicableProductRules(productCodes);
@@ -135,6 +151,12 @@ public with sharing class AQE_QuoteController {
                 result.lineIds   = lineIds;
                 result.isBulk    = false;
             } else {
+                // Persist the transaction log now (before enqueue) so the Queueable
+                // receives a valid transactionLogId to track progress against.
+                if (txnLog.Id == null) {
+                    txnLog.Processing_Status__c = 'Pending';
+                    insert txnLog;
+                }
                 String batchId = AQE_BulkQuoteProcessor.enqueueBulkCreation(
                     quoteId, validation.lines, txnLog.Id
                 );
@@ -237,6 +259,47 @@ public with sharing class AQE_QuoteController {
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Loads every active product from the standard pricebook into a code-keyed map.
+     * Called before the LLM so the full catalogue is available as context.
+     */
+    private static Map<String, AQE_ProductDTO> loadAllActiveProducts() {
+        List<PricebookEntry> pbes = [
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, UnitPrice
+            FROM   PricebookEntry
+            WHERE  IsActive = true
+            AND    Pricebook2.IsStandard = true
+            WITH   SECURITY_ENFORCED
+            LIMIT  500
+        ];
+        Map<String, AQE_ProductDTO> result = new Map<String, AQE_ProductDTO>();
+        for (PricebookEntry pbe : pbes) {
+            AQE_ProductDTO dto = new AQE_ProductDTO();
+            dto.id               = pbe.Product2Id;
+            dto.name             = pbe.Product2.Name;
+            dto.productCode      = pbe.Product2.ProductCode;
+            dto.listPrice        = pbe.UnitPrice;
+            dto.pricebookEntryId = pbe.Id;
+            result.put(pbe.Product2.ProductCode, dto);
+        }
+        return result;
+    }
+
+    /**
+     * Converts a product map into the lightweight list sent to the LLM as catalogue context.
+     */
+    private static List<Map<String, Object>> buildProductCatalogue(Map<String, AQE_ProductDTO> productMap) {
+        List<Map<String, Object>> catalogue = new List<Map<String, Object>>();
+        for (AQE_ProductDTO p : productMap.values()) {
+            catalogue.add(new Map<String, Object>{
+                'code'       => p.productCode,
+                'name'       => p.name,
+                'list_price' => p.listPrice
+            });
+        }
+        return catalogue;
+    }
 
     private static List<String> extractProductCodes(List<AQE_QuoteLineDTO> lines) {
         Set<String> codes = new Set<String>();

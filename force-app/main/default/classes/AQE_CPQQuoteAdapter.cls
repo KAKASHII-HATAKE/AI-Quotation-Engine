@@ -111,9 +111,6 @@ public with sharing class AQE_CPQQuoteAdapter implements AQE_IQuoteAdapter {
                 if (line.discountPercent != null) {
                     ql.put('SBQQ__Discount__c', line.discountPercent);
                 }
-                if (line.externalRef != null) {
-                    ql.put('SBQQ__PartnerDiscount__c', line.externalRef); // repurposed for ref tracking
-                }
                 if (line.customFields != null) {
                     for (String f : line.customFields.keySet()) { ql.put(f, line.customFields.get(f)); }
                 }
