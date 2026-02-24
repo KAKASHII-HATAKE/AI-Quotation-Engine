@@ -49,14 +49,22 @@ public with sharing class AQE_QuoteController {
 
             Integer maxSyncLines = config.Max_Quote_Lines__c != null ? (Integer) config.Max_Quote_Lines__c : 30;
 
-            // 3. Load applicable rules (product codes extracted from prompt by LLM first)
+            // 3. Load rules that don't require product codes (discount + approval) upfront
+            //    so they are available in the LLM context before the callout.
             List<AI_Approval_Policy__c> approvalPolicies = AQE_RuleEngine.getAllApprovalPolicies();
             List<AI_Discount_Rule__c> discountRules = AQE_RuleEngine.getApplicableDiscountRules(Date.today());
 
-            // 4. Build LLM request — rules go in as context, not raw data
+            // 4. Build LLM request — pass discount rules as context so the LLM honours
+            //    them when generating prices. Product-specific rules are loaded after the
+            //    LLM responds (product codes are not yet known at this point).
             AQE_LLMService.LLMRequest llmReq = new AQE_LLMService.LLMRequest();
             llmReq.userPrompt  = String.escapeSingleQuotes(userPrompt.trim());
             llmReq.sessionId   = txnLog.Id;
+            llmReq.ruleContext = AQE_RuleEngine.buildRuleContext(
+                new List<AI_Pricing_Rule__c>(),
+                new List<AI_Product_Rule__c>(),
+                discountRules
+            );
             llmReq.orgContext  = JSON.serialize(new Map<String, Object>{
                 'cloud_environment' => AQE_CloudDetector.getCurrent(),
                 'account_id'        => accountId,
@@ -71,16 +79,28 @@ public with sharing class AQE_QuoteController {
                 throw new AQE_Exception('LLM processing failed: ' + llmResp.errorMessage);
             }
 
-            // 6. Load products for validation (using codes from LLM response)
+            // 6. Load products + product-specific rules (product codes now known)
             List<String> productCodes = extractProductCodes(llmResp.quoteLines);
             AQE_IQuoteAdapter adapter = AQE_AdapterFactory.getAdapter();
             List<AQE_ProductDTO> products = adapter.getProducts(productCodes);
             Map<String, AQE_ProductDTO> productMap = new Map<String, AQE_ProductDTO>();
             for (AQE_ProductDTO p : products) { productMap.put(p.productCode, p); }
 
-            // 7. Deterministic validation pass
+            List<AI_Pricing_Rule__c> pricingRules = AQE_RuleEngine.getApplicablePricingRules(productCodes, Date.today());
+            List<AI_Product_Rule__c> productRules  = AQE_RuleEngine.getApplicableProductRules(productCodes);
+
+            // Rules are fully optional. If none exist for this quote, the user's request
+            // is honoured exactly (math correctness is still verified).
+            // If any rule is found, it is enforced.
+            Boolean rulesExist = !approvalPolicies.isEmpty() || !discountRules.isEmpty()
+                || !pricingRules.isEmpty() || !productRules.isEmpty();
+
+            // 7. Deterministic validation — enforce discount caps only when rules are present
             AQE_ValidationEngine.ValidationResult validation =
-                AQE_ValidationEngine.validateQuoteLines(llmResp.quoteLines, productMap, discountRules);
+                AQE_ValidationEngine.validateQuoteLines(
+                    llmResp.quoteLines, productMap,
+                    rulesExist ? discountRules : new List<AI_Discount_Rule__c>()
+                );
 
             if (!validation.isValid) {
                 result.success = false;
@@ -93,10 +113,11 @@ public with sharing class AQE_QuoteController {
             // 8. Validate totals
             AQE_ValidationEngine.validateTotals(validation.lines, llmResp.quoteSummary);
 
-            // 9. Determine approval requirement
-            AQE_ApprovalEngine.ApprovalDecision approvalDecision = AQE_ApprovalEngine.evaluate(
-                new AQE_QuoteDTO(), validation.lines, llmResp.quoteSummary, approvalPolicies
-            );
+            // 9. Determine approval requirement — skipped entirely when no rules are present
+            AQE_ApprovalEngine.ApprovalDecision approvalDecision = rulesExist
+                ? AQE_ApprovalEngine.evaluate(
+                    new AQE_QuoteDTO(), validation.lines, llmResp.quoteSummary, approvalPolicies)
+                : new AQE_ApprovalEngine.ApprovalDecision(); // no rules → no approval required
 
             // 10. Create the quote header
             Id pricebookId = getStandardPricebookId();
