@@ -1,0 +1,71 @@
+<template>
+    <div class="preview-container">
+
+        <!-- Quote Header -->
+        <div class="slds-grid slds-gutters slds-m-bottom_small">
+            <div class="slds-col">
+                <h2 class="slds-text-heading_medium">
+                    Quote Preview
+                    <span class="slds-badge slds-m-left_x-small">{lineCount} lines</span>
+                    <template if:true={isBulk}>
+                        <span class="slds-badge slds-badge_success slds-m-left_x-small">Bulk Processing</span>
+                    </template>
+                </h2>
+            </div>
+            <div class="slds-col slds-no-flex">
+                <lightning-button
+                    label="View Quote Record"
+                    icon-name="utility:preview"
+                    variant="neutral"
+                    onclick={handleViewQuote}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <!-- Approval Warning -->
+        <template if:true={approvalRequired}>
+            <div class="slds-notify slds-notify_alert slds-alert_warning slds-m-bottom_small" role="alert">
+                <lightning-icon icon-name="utility:warning" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                <strong>Approval Required</strong> — This quote will be automatically routed for approval.
+                <div class="slds-m-top_xx-small chain-text">{approvalChain}</div>
+            </div>
+        </template>
+
+        <!-- Line Items Table -->
+        <lightning-datatable
+            key-field="_key"
+            data={lines}
+            columns={columns}
+            draft-values={draftValues}
+            onsave={handleSave}
+            onrowaction={handleRowAction}
+            hide-checkbox-column
+            suppress-bottom-bar>
+        </lightning-datatable>
+
+        <!-- Totals Footer -->
+        <div class="totals-panel slds-m-top_medium">
+            <table class="totals-table">
+                <tr>
+                    <td class="totals-label">Subtotal (List Price)</td>
+                    <td class="totals-value">
+                        <lightning-formatted-number value={subtotal} format-style="currency" currency-code="USD" minimum-fraction-digits="2"></lightning-formatted-number>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="totals-label">Total Discount ({effectiveDiscount}%)</td>
+                    <td class="totals-value discount-value">
+                        −<lightning-formatted-number value={totalDiscount} format-style="currency" currency-code="USD" minimum-fraction-digits="2"></lightning-formatted-number>
+                    </td>
+                </tr>
+                <tr class="net-total-row">
+                    <td class="totals-label totals-label--bold">Net Total</td>
+                    <td class="totals-value totals-value--bold">
+                        <lightning-formatted-number value={netTotal} format-style="currency" currency-code="USD" minimum-fraction-digits="2"></lightning-formatted-number>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+</template>

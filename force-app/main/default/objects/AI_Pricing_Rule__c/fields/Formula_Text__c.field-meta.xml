@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Formula_Text__c</fullName>
+    <description>Structured natural language formula defining HOW price is calculated when condition is met. Supports tiered pricing, percentage adjustments, and minimum price floors.</description>
+    <label>Formula Text</label>
+    <length>32768</length>
+    <trackHistory>false</trackHistory>
+    <type>LongTextArea</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Approval_Chain__c</fullName>
+    <description>Structured text defining the ordered approval chain. Format: LEVEL 1: {Role/User} -> {timeout}h timeout -> escalate. Supports auto-approve conditions.</description>
+    <label>Approval Chain</label>
+    <length>32768</length>
+    <trackHistory>false</trackHistory>
+    <type>LongTextArea</type>
+    <visibleLines>8</visibleLines>
+</CustomField>

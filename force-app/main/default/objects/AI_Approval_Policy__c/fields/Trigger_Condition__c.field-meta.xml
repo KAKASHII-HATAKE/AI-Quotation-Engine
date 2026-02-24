@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Trigger_Condition__c</fullName>
+    <description>Structured natural language conditions that trigger this approval policy. Multi-factor: discount magnitude, deal value, customer tier, product sensitivity, rep authority level.</description>
+    <label>Trigger Condition</label>
+    <length>32768</length>
+    <trackHistory>false</trackHistory>
+    <type>LongTextArea</type>
+    <visibleLines>8</visibleLines>
+</CustomField>

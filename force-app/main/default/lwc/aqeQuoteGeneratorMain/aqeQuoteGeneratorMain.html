@@ -1,0 +1,80 @@
+<template>
+    <lightning-card title="AI Quote Generator" icon-name="custom:custom108">
+        <div class="slds-p-around_medium">
+
+            <!-- Engine Status Badge -->
+            <div class={engineStatusClass}>
+                <lightning-icon
+                    icon-name={engineActive ? 'utility:check' : 'utility:warning'}
+                    size="x-small"
+                    class="slds-m-right_xx-small">
+                </lightning-icon>
+                {engineStatusLabel}
+            </div>
+
+            <!-- Errors -->
+            <template if:true={hasErrors}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_small" role="alert">
+                    <template for:each={errors} for:item="err">
+                        <p key={err}>{err}</p>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Warnings -->
+            <template if:true={hasWarnings}>
+                <div class="slds-notify slds-notify_alert slds-alert_warning slds-m-bottom_small" role="alert">
+                    <template for:each={warnings} for:item="warn">
+                        <p key={warn}>{warn}</p>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Prompt Input -->
+            <div class="slds-form-element slds-m-bottom_medium">
+                <lightning-textarea
+                    label={promptLabel}
+                    value={userPrompt}
+                    max-length="2000"
+                    rows="4"
+                    placeholder="e.g. Create a quote for 100 Laptop Pro units and 100 extended warranties with 12% enterprise discount for Acme Corp"
+                    onchange={handlePromptChange}
+                    disabled={isProcessing}>
+                </lightning-textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="slds-button-group slds-m-bottom_medium">
+                <lightning-button
+                    label="Generate Quote"
+                    variant="brand"
+                    icon-name="utility:sparkles"
+                    onclick={handleGenerateClick}
+                    disabled={isDisabled}>
+                </lightning-button>
+                <lightning-button
+                    label="Clear"
+                    variant="neutral"
+                    onclick={handleClear}
+                    disabled={isProcessing}>
+                </lightning-button>
+            </div>
+
+            <!-- Loading Indicator -->
+            <template if:true={isProcessing}>
+                <c-aqe-loading-indicator
+                    message="AI is analysing your request and generating the quote...">
+                </c-aqe-loading-indicator>
+            </template>
+
+            <!-- Quote Preview -->
+            <template if:true={showPreview}>
+                <c-aqe-quote-preview
+                    quote-result={quoteResult}
+                    onquoteupdated={handleQuoteUpdated}>
+                </c-aqe-quote-preview>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

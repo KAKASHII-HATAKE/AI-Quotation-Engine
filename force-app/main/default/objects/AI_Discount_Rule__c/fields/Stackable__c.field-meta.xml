@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Stackable__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>When true, this discount can be combined with other active discounts. When false, only the highest single discount applies.</description>
+    <label>Stackable</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

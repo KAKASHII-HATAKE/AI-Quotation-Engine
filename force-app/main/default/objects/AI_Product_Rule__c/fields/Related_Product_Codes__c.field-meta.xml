@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Related_Product_Codes__c</fullName>
+    <description>Comma-separated product codes affected by this rule. For Dependency: codes to auto-add. For Exclusion: codes that cannot coexist. For Bundle: codes included in the bundle.</description>
+    <label>Related Product Codes</label>
+    <length>2000</length>
+    <trackHistory>false</trackHistory>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

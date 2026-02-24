@@ -1,0 +1,43 @@
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%);
+    border-radius: 0.5rem;
+    border: 1px solid #e8eaf6;
+}
+
+.spinner-wrap {
+    position: relative;
+    height: 3rem;
+    margin-bottom: 1rem;
+}
+
+.loading-message {
+    color: #3d3d3d;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.progress-dots {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #0176d3;
+    animation: bounce 1.2s infinite;
+}
+
+.dot-2 { animation-delay: 0.2s; }
+.dot-3 { animation-delay: 0.4s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40%            { transform: scale(1);   opacity: 1;   }
+}

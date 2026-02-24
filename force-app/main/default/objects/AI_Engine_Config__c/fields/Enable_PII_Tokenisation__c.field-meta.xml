@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enable_PII_Tokenisation__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>When enabled, all PII is stripped and replaced with anonymous tokens before any data reaches the LLM. Strongly recommended for production.</description>
+    <label>Enable PII Tokenisation</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

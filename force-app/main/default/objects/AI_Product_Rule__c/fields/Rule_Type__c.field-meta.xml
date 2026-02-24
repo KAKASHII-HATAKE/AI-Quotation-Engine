@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rule_Type__c</fullName>
+    <description>Type of product rule. Dependency = auto-add required products. Exclusion = mutually exclusive. Bundle = group at discount. Validation = prevent invalid configs.</description>
+    <label>Rule Type</label>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Dependency</fullName><default>false</default><label>Dependency (Auto-Add)</label></value>
+            <value><fullName>Exclusion</fullName><default>false</default><label>Exclusion (Mutually Exclusive)</label></value>
+            <value><fullName>Bundle</fullName><default>false</default><label>Bundle (Group Discount)</label></value>
+            <value><fullName>Validation</fullName><default>false</default><label>Validation (Block Invalid)</label></value>
+            <value><fullName>Recommendation</fullName><default>false</default><label>Recommendation (Suggest)</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

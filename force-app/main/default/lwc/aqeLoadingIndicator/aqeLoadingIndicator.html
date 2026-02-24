@@ -1,0 +1,17 @@
+<template>
+    <div class="loading-container" role="status" aria-live="polite">
+        <div class="spinner-wrap">
+            <lightning-spinner
+                alternative-text="Loading"
+                size="medium"
+                variant={variant}>
+            </lightning-spinner>
+        </div>
+        <p class="loading-message">{message}</p>
+        <div class="progress-dots">
+            <span class="dot dot-1"></span>
+            <span class="dot dot-2"></span>
+            <span class="dot dot-3"></span>
+        </div>
+    </div>
+</template>

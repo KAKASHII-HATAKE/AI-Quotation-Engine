@@ -1,0 +1,112 @@
+<template>
+    <lightning-card title="AQE Setup &amp; Configuration" icon-name="utility:settings">
+        <div class="slds-p-around_medium">
+
+            <template if:true={isLoading}>
+                <c-aqe-loading-indicator message="Loading engine status..."></c-aqe-loading-indicator>
+            </template>
+
+            <template if:true={statusLoaded}>
+
+                <!-- Status Grid -->
+                <div class="setup-grid slds-m-bottom_medium">
+
+                    <!-- Engine Active -->
+                    <div class="status-card">
+                        <lightning-icon
+                            icon-name={engineStatusIcon}
+                            variant={engineStatusVariant}
+                            size="small">
+                        </lightning-icon>
+                        <div class="status-info">
+                            <span class="status-label">Engine Status</span>
+                            <span class="status-value">{engineActive ? 'Active' : 'Disabled'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Cloud Environment -->
+                    <div class="status-card">
+                        <lightning-icon icon-name="utility:connected_apps" size="small"></lightning-icon>
+                        <div class="status-info">
+                            <span class="status-label">Cloud Environment</span>
+                            <span class="status-value">{environmentBadge}</span>
+                        </div>
+                    </div>
+
+                    <!-- Backend Connectivity -->
+                    <div class="status-card">
+                        <lightning-icon
+                            icon-name={backendIcon}
+                            variant={backendVariant}
+                            size="small">
+                        </lightning-icon>
+                        <div class="status-info">
+                            <span class="status-label">Backend Service</span>
+                            <span class="status-value">{backendReachable ? 'Reachable' : 'Unreachable'}</span>
+                        </div>
+                    </div>
+
+                    <!-- LLM Model -->
+                    <div class="status-card">
+                        <lightning-icon icon-name="utility:sparkles" size="small"></lightning-icon>
+                        <div class="status-info">
+                            <span class="status-label">LLM Model</span>
+                            <span class="status-value">{llmModel}</span>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Processing Limit -->
+                    <div class="status-card">
+                        <lightning-icon icon-name="utility:list" size="small"></lightning-icon>
+                        <div class="status-info">
+                            <span class="status-label">Max Sync Lines</span>
+                            <span class="status-value">{maxSyncLines}</span>
+                        </div>
+                    </div>
+
+                    <!-- PII Tokenisation -->
+                    <div class="status-card">
+                        <lightning-icon icon-name="utility:shield" size="small"></lightning-icon>
+                        <div class="status-info">
+                            <span class="status-label">PII Tokenisation</span>
+                            <span class="status-value">{piiEnabled ? 'Enabled' : 'Disabled'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="slds-button-group">
+                    <lightning-button
+                        label="Re-detect Environment"
+                        icon-name="utility:search"
+                        variant="brand"
+                        onclick={handleDetectEnvironment}
+                        disabled={isDetecting}>
+                    </lightning-button>
+                    <lightning-button
+                        label="Refresh Status"
+                        icon-name="utility:refresh"
+                        variant="neutral"
+                        onclick={handleRefresh}
+                        disabled={isLoading}>
+                    </lightning-button>
+                </div>
+
+                <!-- Setup Instructions -->
+                <div class="setup-instructions slds-m-top_medium">
+                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">Quick Setup Checklist</h3>
+                    <ol class="slds-list_ordered">
+                        <li>Configure Named Credential <strong>AQE_Backend</strong> with your Node.js middleware URL</li>
+                        <li>Set <strong>Engine Active = true</strong> in AI Engine Config custom settings</li>
+                        <li>Set your <strong>LLM Model</strong> (e.g. claude-sonnet-4-6)</li>
+                        <li>Run <strong>Re-detect Environment</strong> to auto-configure cloud adapter</li>
+                        <li>Create your first <strong>AI Pricing Rule</strong> record to test</li>
+                        <li>Assign <strong>AQE_Admin</strong> permission set to admin users</li>
+                        <li>Assign <strong>AQE_User</strong> permission set to sales users</li>
+                    </ol>
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

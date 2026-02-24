@@ -1,0 +1,17 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "AI-Quotation-Engine",
+      "versionName": "Version 1.0",
+      "versionNumber": "1.0.0.NEXT",
+      "versionDescription": "AI-Native Quotation Engine for Salesforce CPQ & Revenue Cloud"
+    }
+  ],
+  "name": "AI-Quotation-Engine",
+  "namespace": "aqe",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "65.0",
+  "packageAliases": {}
+}

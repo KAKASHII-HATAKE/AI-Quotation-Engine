@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <!-- AQE Apex Classes -->
+    <types>
+        <members>AQE_IQuoteAdapter</members>
+        <members>AQE_QuoteDTO</members>
+        <members>AQE_QuoteLineDTO</members>
+        <members>AQE_ProductDTO</members>
+        <members>AQE_QuoteTotalsDTO</members>
+        <members>AQE_Exception</members>
+        <members>AQE_CloudDetector</members>
+        <members>AQE_AdapterFactory</members>
+        <members>AQE_StandardQuoteAdapter</members>
+        <members>AQE_CPQQuoteAdapter</members>
+        <members>AQE_RevenueCloudAdapter</members>
+        <members>AQE_SecurityUtil</members>
+        <members>AQE_RuleEngine</members>
+        <members>AQE_ValidationEngine</members>
+        <members>AQE_ApprovalEngine</members>
+        <members>AQE_LLMService</members>
+        <members>AQE_BulkQuoteProcessor</members>
+        <members>AQE_QuoteController</members>
+        <name>ApexClass</name>
+    </types>
+    <!-- LWC Components -->
+    <types>
+        <members>aqeQuoteGeneratorMain</members>
+        <members>aqeQuotePreview</members>
+        <members>aqeLoadingIndicator</members>
+        <members>aqeCloudSetupWizard</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <!-- Custom Objects -->
+    <types>
+        <members>AI_Pricing_Rule__c</members>
+        <members>AI_Product_Rule__c</members>
+        <members>AI_Discount_Rule__c</members>
+        <members>AI_Approval_Policy__c</members>
+        <members>AI_Delegate_Config__c</members>
+        <members>AI_Engine_Config__c</members>
+        <members>AI_Transaction_Log__c</members>
+        <name>CustomObject</name>
+    </types>
+    <!-- Named Credentials -->
+    <types>
+        <members>AQE_Backend</members>
+        <name>NamedCredential</name>
+    </types>
+    <!-- Permission Sets -->
+    <types>
+        <members>AQE_Admin</members>
+        <members>AQE_User</members>
+        <name>PermissionSet</name>
+    </types>
+    <version>65.0</version>
+</Package>
